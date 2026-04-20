@@ -1,0 +1,8 @@
+./checkpoints
+*.pt
+
+./logs
+*.log
+
+__pychache__/
+*.pyc
