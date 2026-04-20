@@ -1,5 +1,7 @@
 import torch
 import torch.nn.functional as F
+import torch.optim as optim
+import torch.nn as nn
 from math import cos, pi
 import os
 from datetime import datetime
@@ -124,7 +126,7 @@ def train_msn(
     # Close log file
     log_f.write(f"\nTraining completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
     log_f.close()
-    print(f"Training logs saved to {log_file}")
+    print(f"Training logs saved to {log_f.name}")
 
 def adjust_learning_rate(optimizer, step, total_steps, warmup_steps, start_lr, base_lr, final_lr):
     """Cosine LR schedule with warmup."""
@@ -139,3 +141,5 @@ def adjust_learning_rate(optimizer, step, total_steps, warmup_steps, start_lr, b
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
     return lr
+
+
