@@ -1,8 +1,10 @@
 ./checkpoints
+./focal_checkpointa
 *.pt
 
 ./logs
+./focal_logs
 *.log
 
-__pychache__/
+./src/__pychache__/
 *.pyc

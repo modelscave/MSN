@@ -65,6 +65,31 @@ class MSNProcessor(nn.Module):
             "main_anchor": main_anchor_masked,
             "focal_anchors": focal_masked.view(B, M, -1, focal_masked.shape[-1])
         }
+
+
+class IMGProcessor(nn.Module):
+    def __init__(self, patch_size=16, embed_dim=768):
+        super().__init__()
+        self.patch_size = patch_size
+        
+        # Patchify is usually a Conv2d layer in ViT
+        self.patch_embed = nn.Conv2d(
+            in_channels=3, 
+            out_channels=embed_dim, 
+            kernel_size=patch_size, 
+            stride=patch_size
+        )
+
+    def patchify(self, x):
+        """Converts [B, 3, H, W] -> [B, Number_of_Patches, Embed_Dim]"""
+        x = self.patch_embed(x)  # [B, C, H/P, W/P]
+        x = x.flatten(2).transpose(1, 2)  # [B, L, C]
+        return x
+
+    def forward(self, image):
+        # 1. Patchify the input image
+        patches = self.patchify(image)
+        return patches
     
 
 class MSNEncoder(nn.Module):
@@ -129,3 +154,28 @@ class MSNEncoder(nn.Module):
             return p
         
         return z
+
+class LinearProbeModel(nn.Module):
+    """Wrapper for linear probing on top of a frozen backbone."""
+    def __init__(self, backbone, num_classes=2, feature_dim=768):
+        super().__init__()
+        self.backbone = backbone
+        self.head = nn.Linear(feature_dim, num_classes)
+        
+    def forward(self, x):
+        # x should be patches [B, L, D] - already processed by IMGProcessor
+        # Extract features from backbone
+        B, L, D = x.shape
+        
+        with torch.no_grad():
+            cls_token = self.backbone.backbone.cls_token.expand(B, -1, -1)
+            pos_embed = self.backbone.backbone.pos_embed[:, 1:L+1, :]
+            x = x + pos_embed
+            x = torch.cat((cls_token, x), dim=1)
+            x = self.backbone.backbone.blocks(x)
+            x = self.backbone.backbone.norm(x)
+            features = x[:, 0]  # [CLS] token
+        
+        # Linear head on frozen features
+        logits = self.head(features)
+        return logits
