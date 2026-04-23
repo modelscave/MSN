@@ -57,3 +57,32 @@ def evaluate(model, dataloader, criterion, device):
     f1 = f1_score(all_labels, all_preds, average='weighted', zero_division=0)
     
     return avg_loss, accuracy, precision, recall, f1
+
+def sinkhorn_normalization(logits, iterations=3, epsilon=0.05):
+    """
+    logits: [B, K] - The raw similarities from target_encoder (z * prototypes^T)
+    iterations: Number of normalization steps (usually 3 is enough)
+    epsilon: Entropic regularization parameter
+    """
+    # Q is the transpose of the similarity matrix
+    # We work in log space for numerical stability
+    Q = torch.exp(logits / epsilon).t() 
+    B = Q.shape[1]  # Batch size
+    K = Q.shape[0]  # Number of prototypes
+
+    # Make the sum of all elements equal to 1
+    sum_Q = torch.sum(Q)
+    Q /= sum_Q
+
+    for _ in range(iterations):
+        # Normalize columns: sum of each column should be 1/B
+        Q /= torch.sum(Q, dim=0, keepdim=True)
+        Q /= B
+
+        # Normalize rows: sum of each row should be 1/K
+        Q /= torch.sum(Q, dim=1, keepdim=True)
+        Q /= K
+
+    # Normalize by B to return probabilities that sum to 1 per sample
+    Q *= B 
+    return Q.t() # [B, K]

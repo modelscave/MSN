@@ -21,7 +21,7 @@ class MSNProcessor(nn.Module):
     def patchify(self, x):
         """Converts [B, 3, H, W] -> [B, Number_of_Patches, Embed_Dim]"""
         x = self.patch_embed(x)  # [B, C, H/P, W/P]
-        x = x.flatten(2).transpose(1, 2)  # [B, L, C]
+        x = x.flatten(2).transpose(1, 2)  # [B, L, D]
         return x
 
     def apply_mask(self, patches, mask_ratio=None):

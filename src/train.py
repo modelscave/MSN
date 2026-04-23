@@ -7,6 +7,8 @@ import os
 from datetime import datetime
 from timm.loss import LabelSmoothingCrossEntropy
 
+from .util import sinkhorn_normalization
+
 def train_msn(
     anchor_encoder,    # Anchor f_theta
     target_encoder,    # Target f_theta_bar
@@ -70,11 +72,12 @@ def train_msn(
         # 3. Teacher Forward (EMA) - NO GRADIENTS
         with torch.no_grad():
             target_probs = target_encoder(target_img, temperature=0.025) # [B, K]
+            target_probs = sinkhorn_normalization(target_probs, iterations=3, epsilon=0.05) # Apply Sinkhorn to get p+
 
         # 4. Student Forward
         anchor_probs = anchor_encoder(anchor_img, temperature=0.1) # [B, K]
         focal_probs = anchor_encoder(focal_imgs, temperature=0.1) # [B*M, K]
-
+ 
         # 5. Loss Calculation
         loss = criterion(anchor_probs, focal_probs, target_probs)
 
