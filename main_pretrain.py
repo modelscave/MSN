@@ -48,7 +48,7 @@ def parse_arguments():
     # Loss and checkpointing
     parser.add_argument('--lambd', type=float, default=1.0, help='Loss weight parameter')
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints', help='Directory to save checkpoints')
-    parser.add_argument('--log_file', type=str, default='./training.log', help='Path to training log file')
+    parser.add_argument('--log_dir', type=str, default='./logs', help='Directory to save training logs')
     
     args = parser.parse_args()
     return args
@@ -87,7 +87,7 @@ def main(args):
         final_lr=args.final_lr,
         momentum_base=args.momentum_base,
         checkpoint_dir=args.checkpoint_dir,
-        log_file=args.log_file
+        log_dir=args.log_dir
     )   
 
 if __name__ == "__main__":

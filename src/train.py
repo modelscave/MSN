@@ -72,7 +72,7 @@ def train_msn(
         # 3. Teacher Forward (EMA) - NO GRADIENTS
         with torch.no_grad():
             target_probs = target_encoder(target_img, temperature=0.025) # [B, K]
-            target_probs = sinkhorn_normalization(target_probs, iterations=3, epsilon=0.05) # Apply Sinkhorn to get p+
+            target_probs = sinkhorn_normalization(target_probs, iterations=3, epsilon=0.025) # Apply Sinkhorn to get p+
 
         # 4. Student Forward
         anchor_probs = anchor_encoder(anchor_img, temperature=0.1) # [B, K]
