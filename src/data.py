@@ -72,7 +72,25 @@ class ODIRAMDDataset(Dataset):
             image = self.transform(image)
         
         return image, label    
-    
+
+class FundusDataset(Dataset):
+    def __init__(self, parquet_file, transform=None):
+        self.dataframe = pd.read_parquet(parquet_file)
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.dataframe)
+
+    def __getitem__(self, idx):
+        img_path = self.dataframe.iloc[idx]['file_path']
+        image = Image.open(img_path).convert('RGB')
+        label = self.dataframe.iloc[idx]['modality']
+        
+        if self.transform:
+            image = self.transform(image)
+        
+        return image, label
+
 class MSNAugmentation:
     def __init__(self, m=10):
         self.m = m

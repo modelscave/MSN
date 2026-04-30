@@ -8,7 +8,7 @@ import argparse
 
 
 
-from src.data import BinaryAMDDataset, RFMIDDataset, ODIRAMDDataset, MSNAugmentation
+from src.data import BinaryAMDDataset, RFMIDDataset, ODIRAMDDataset, MSNAugmentation, FundusDataset
 from src.model import MSNEncoder, MSNProcessor
 from src.train import train_msn
 from src.loss import MSNLoss
@@ -33,6 +33,8 @@ def parse_arguments():
     parser.add_argument('--num_workers', type=int, default=4, help='Number of workers for DataLoader')
     parser.add_argument('--csv_file', type=str, default='/home/chaksuai/Yash/Data/ODIR-5k/ODIR-5K/ODIR-5K/data.xlsx',
                         help='Path to CSV file with data annotations')
+    parser.add_argument('--paraquet_file', type=str, default='/home/chaksuai/Yash/Data/updated_fundus_descriptions_train.parquet',
+                        help='Path to Parquet file with data annotations')
     parser.add_argument('--root_dir', type=str, default='/home/chaksuai/Yash/Data/ODIR-5k/ODIR-5K/ODIR-5K/Training Images',
                         help='Root directory containing training images')
     
@@ -60,7 +62,8 @@ def main(args):
 
     # --- 1. Initialize Datasets and DataLoader ---
     msn_aug = MSNAugmentation(m=args.num_focal_anchors)
-    data = ODIRAMDDataset(csv_file=args.csv_file, root_dir=args.root_dir, transform=msn_aug)
+    # data = ODIRAMDDataset(csv_file=args.csv_file, root_dir=args.root_dir, transform=msn_aug)
+    data = FundusDataset(parquet_file=args.paraquet_file, transform=msn_aug)
     dataloader = DataLoader(data, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
 
     # --- 2. Initialize Models and Optimizer ---    

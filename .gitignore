@@ -1,10 +1,14 @@
-./checkpoints
-./focal_checkpointa
+checkpoints
+focal_checkpoints
+checkpoints_1
+full_dataset
 *.pt
 
-./logs
-./focal_logs
+logs
+focal_logs
+full_dataset_logs
+*.ipynb
 *.log
 
-./src/__pychache__/
+src/__pychache__
 *.pyc
